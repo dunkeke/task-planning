@@ -25,12 +25,28 @@
         <input type="text" id="new-task" placeholder="添加新任务...">
         <button id="add-task"><i class="fas fa-plus"></i></button>
     </div>
+
+    <div class="task-hint">
+        <i class="fas fa-grip-lines"></i> 拖拽任务可调整优先级顺序
+    </div>
     
     <!-- 任务列表 -->
     <ul id="task-list">
         <!-- 任务项会动态添加到这里 -->
     </ul>
-    
+
+    <!-- 日度工作量记录 -->
+    <div class="workload-section">
+        <h4>日度工作量</h4>
+        <div class="workload-inputs">
+            <input type="date" id="workload-date">
+            <input type="number" id="workload-hours" min="0" step="0.5" placeholder="工时">
+            <input type="text" id="workload-notes" placeholder="工作内容要点">
+            <button id="add-workload"><i class="fas fa-clipboard-check"></i></button>
+        </div>
+        <ul id="workload-list"></ul>
+    </div>
+
     <!-- 进度统计 -->
     <div class="stats">
         完成: <span id="completed-count">0</span>/<span id="total-count">0</span>

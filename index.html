@@ -20,22 +20,23 @@
         </div>
         
         <div class="content">
-            <!-- 任务列表 -->
-            <div class="task-input">
-                <input type="text" id="new-task" placeholder="添加新任务...">
-                <button id="add-task"><i class="fas fa-plus"></i></button>
-            </div>
-            
-            <ul id="task-list">
-                <!-- 任务项会动态添加到这里 -->
-            </ul>
-            
-            <!-- 进度统计 -->
-            <div class="stats">
-                完成: <span id="completed-count">0</span>/<span id="total-count">0</span>
-            </div>
-        </div>
+    <!-- 任务输入区域 -->
+    <div class="task-input">
+        <input type="text" id="new-task" placeholder="添加新任务...">
+        <button id="add-task"><i class="fas fa-plus"></i></button>
     </div>
+    
+    <!-- 任务列表 -->
+    <ul id="task-list">
+        <!-- 任务项会动态添加到这里 -->
+    </ul>
+    
+    <!-- 进度统计 -->
+    <div class="stats">
+        完成: <span id="completed-count">0</span>/<span id="total-count">0</span>
+    </div>
+</div>
+ 
     
     <!-- 最小化时显示的按钮 -->
     <button id="restore-btn" class="restore-btn">
@@ -44,4 +45,5 @@
     
     <script src="script.js"></script>
 </body>
+
 </html>

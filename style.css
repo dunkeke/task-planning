@@ -1,0 +1,66 @@
+.floating-window {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 350px;
+    height: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    transition: all 0.3s ease;
+    border: 1px solid #e1e5e9;
+}
+
+/* 拖拽条 */
+#drag-bar {
+    height: 40px;
+    cursor: move;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    color: white;
+    user-select: none;
+}
+
+/* 任务项样式 */
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    animation: slideIn 0.3s ease;
+}
+
+.task-item.completed {
+    opacity: 0.7;
+    text-decoration: line-through;
+    color: #888;
+}
+
+/* 最小化按钮 */
+.restore-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 9998;
+}
+
+/* 动画效果 */
+@keyframes slideIn {
+    from { transform: translateX(-10px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}

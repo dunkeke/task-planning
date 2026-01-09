@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>工作计划浮窗</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- 拖拽区域 -->
+    <div id="drag-bar"></div>
+    
+    <!-- 主浮窗 -->
+    <div id="floating-window" class="floating-window">
+        <div class="header">
+            <h3>今日计划 <span id="current-date"></span></h3>
+            <div class="controls">
+                <button id="minimize"><i class="fas fa-minus"></i></button>
+                <button id="close"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- 任务列表 -->
+            <div class="task-input">
+                <input type="text" id="new-task" placeholder="添加新任务...">
+                <button id="add-task"><i class="fas fa-plus"></i></button>
+            </div>
+            
+            <ul id="task-list">
+                <!-- 任务项会动态添加到这里 -->
+            </ul>
+            
+            <!-- 进度统计 -->
+            <div class="stats">
+                完成: <span id="completed-count">0</span>/<span id="total-count">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 最小化时显示的按钮 -->
+    <button id="restore-btn" class="restore-btn">
+        <i class="fas fa-tasks"></i>
+    </button>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "工作计划浮窗",
+  "short_name": "TaskFloat",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff"
+}

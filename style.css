@@ -50,6 +50,17 @@
     background: #5a67d8;
 }
 
+.task-hint {
+    padding: 6px 15px;
+    font-size: 12px;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px dashed #e1e5e9;
+    background: #fcfcfd;
+}
+
 /* 任务列表 */
 #task-list {
     list-style: none;
@@ -57,7 +68,7 @@
     margin: 0;
     flex: 1;
     overflow-y: auto;
-    max-height: 350px;
+    max-height: 280px;
 }
 
 .task-item {
@@ -67,10 +78,27 @@
     border-bottom: 1px solid #f0f0f0;
     background: white;
     transition: all 0.3s ease;
+    gap: 8px;
+    animation: slideIn 0.3s ease;
 }
 
 .task-item:hover {
     background: #f8f9fa;
+}
+
+.task-item.dragging {
+    opacity: 0.6;
+    background: #edf2ff;
+}
+
+.task-priority {
+    color: #a0aec0;
+    cursor: grab;
+    padding-top: 4px;
+}
+
+.task-priority:active {
+    cursor: grabbing;
 }
 
 .task-checkbox {
@@ -101,6 +129,73 @@
     font-size: 12px;
     color: #888;
     margin-top: 4px;
+}
+
+.subtasks {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #f7fafc;
+}
+
+.subtask-list {
+    list-style: none;
+    margin: 0 0 8px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #4a5568;
+    gap: 8px;
+}
+
+.subtask-item label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.subtask-item.completed span {
+    text-decoration: line-through;
+    color: #a0aec0;
+}
+
+.subtask-delete {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.subtask-input {
+    display: flex;
+    gap: 6px;
+}
+
+.subtask-input input {
+    flex: 1;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.subtask-input button {
+    width: 32px;
+    border: none;
+    border-radius: 6px;
+    background: #805ad5;
+    color: #fff;
+    cursor: pointer;
 }
 
 .task-actions {
@@ -149,6 +244,91 @@
     font-weight: bold;
 }
 
+/* 日度工作量 */
+.workload-section {
+    border-top: 1px solid #e1e5e9;
+    padding: 12px 15px;
+    background: #fff;
+}
+
+.workload-section h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #2d3748;
+}
+
+.workload-inputs {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr 1.2fr auto;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.workload-inputs input {
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.workload-inputs button {
+    border: none;
+    border-radius: 6px;
+    background: #38a169;
+    color: white;
+    padding: 0 10px;
+    cursor: pointer;
+}
+
+#workload-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.workload-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7fafc;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+.workload-info {
+    display: grid;
+    gap: 2px;
+}
+
+.workload-info span {
+    color: #2f855a;
+    font-weight: 600;
+}
+
+.workload-info small {
+    color: #718096;
+}
+
+.workload-delete {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+}
+
+.workload-empty {
+    font-size: 12px;
+    color: #a0aec0;
+    text-align: center;
+    padding: 6px 0;
+}
+
 /* 滚动条样式 */
 #task-list::-webkit-scrollbar {
     width: 6px;
@@ -181,18 +361,8 @@
 }
 
 /* 任务项样式 */
-.task-item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
-    animation: slideIn 0.3s ease;
-}
-
 .task-item.completed {
     opacity: 0.7;
-    text-decoration: line-through;
-    color: #888;
 }
 
 /* 最小化按钮 */

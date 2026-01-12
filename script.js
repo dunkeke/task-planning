@@ -7,6 +7,8 @@ const totalCount = document.getElementById('total-count');
 const minimizeBtn = document.getElementById('minimize');
 const closeBtn = document.getElementById('close');
 const restoreBtn = document.getElementById('restore-btn');
+const urgentFlagInput = document.getElementById('urgent-flag');
+const urgentTimeInput = document.getElementById('urgent-time');
 const workloadDateInput = document.getElementById('workload-date');
 const workloadHoursInput = document.getElementById('workload-hours');
 const workloadNotesInput = document.getElementById('workload-notes');
@@ -27,6 +29,7 @@ class TaskManager {
         this.updateStats();
         this.renderWorkloadRecords();
         this.setupEventListeners();
+        this.startAlarmWatcher();
     }
 
     setupEventListeners() {
@@ -63,6 +66,10 @@ class TaskManager {
             return;
         }
 
+        const isUrgent = urgentFlagInput.checked;
+        const urgentTime = urgentTimeInput.value;
+        const alarmAt = this.buildAlarmTimestamp(isUrgent, urgentTime);
+
         const task = {
             id: Date.now(), // 唯一ID
             text: taskText,
@@ -70,7 +77,11 @@ class TaskManager {
             createdAt: new Date().toISOString(),
             completedAt: null,
             order: this.getNextOrder(),
-            subtasks: []
+            subtasks: [],
+            urgent: isUrgent,
+            urgentTime: urgentTime || null,
+            alarmAt,
+            alarmTriggered: false
         };
 
         this.tasks.push(task);
@@ -81,6 +92,8 @@ class TaskManager {
         // 清空输入框并聚焦
         newTaskInput.value = '';
         newTaskInput.focus();
+        urgentFlagInput.checked = false;
+        urgentTimeInput.value = '';
     }
 
     renderAllTasks() {
@@ -133,6 +146,12 @@ class TaskManager {
                     ${this.formatTime(task.createdAt)}
                     ${task.completedAt ? ` | 完成于: ${this.formatTime(task.completedAt)}` : ''}
                 </small>
+                ${task.urgent && task.urgentTime ? `
+                    <span class="urgent-badge">
+                        <i class="fas fa-bell"></i>
+                        紧急提醒 ${this.escapeHtml(task.urgentTime)}
+                    </span>
+                ` : ''}
                 <div class="subtasks">
                     <ul class="subtask-list"></ul>
                     <div class="subtask-input">
@@ -200,6 +219,9 @@ class TaskManager {
         if (task) {
             task.completed = completed;
             task.completedAt = completed ? new Date().toISOString() : null;
+            if (completed) {
+                task.alarmTriggered = true;
+            }
             this.saveToLocalStorage();
         }
     }
@@ -226,6 +248,51 @@ class TaskManager {
             completed: false
         });
         this.saveToLocalStorage();
+    }
+
+    startAlarmWatcher() {
+        this.checkUrgentAlarms();
+        setInterval(() => this.checkUrgentAlarms(), 30000);
+    }
+
+    checkUrgentAlarms() {
+        const now = new Date();
+        let hasUpdates = false;
+        this.tasks.forEach(task => {
+            if (!task.urgent || task.completed || task.alarmTriggered || !task.alarmAt) {
+                return;
+            }
+            const alarmTime = new Date(task.alarmAt);
+            if (Number.isNaN(alarmTime.getTime())) {
+                task.alarmTriggered = true;
+                hasUpdates = true;
+                return;
+            }
+            if (now >= alarmTime) {
+                alert(`紧急任务提醒：${task.text}`);
+                task.alarmTriggered = true;
+                hasUpdates = true;
+            }
+        });
+        if (hasUpdates) {
+            this.saveToLocalStorage();
+        }
+    }
+
+    buildAlarmTimestamp(isUrgent, urgentTime) {
+        if (!isUrgent || !urgentTime) {
+            return null;
+        }
+        const [hours, minutes] = urgentTime.split(':').map(Number);
+        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+            return null;
+        }
+        const now = new Date();
+        const alarm = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+        if (alarm.getTime() <= now.getTime()) {
+            alarm.setDate(alarm.getDate() + 1);
+        }
+        return alarm.toISOString();
     }
 
     toggleSubtask(taskId, subtaskId, completed) {
@@ -459,22 +526,42 @@ class TaskManager {
 
 // 拖拽功能
 function setupDrag() {
-    const dragBar = document.getElementById('drag-bar');
+    const dragHandle = document.querySelector('.drag-handle');
     const floatingWindow = document.getElementById('floating-window');
     
     let isDragging = false;
     let offsetX, offsetY;
 
-    dragBar.addEventListener('mousedown', startDrag);
+    const savedPosition = localStorage.getItem('floatingWindowPosition');
+    if (savedPosition) {
+        try {
+            const position = JSON.parse(savedPosition);
+            if (Number.isFinite(position.left) && Number.isFinite(position.top)) {
+                floatingWindow.style.left = `${position.left}px`;
+                floatingWindow.style.top = `${position.top}px`;
+                floatingWindow.style.right = 'auto';
+                floatingWindow.style.bottom = 'auto';
+            }
+        } catch (error) {
+            localStorage.removeItem('floatingWindowPosition');
+        }
+    }
+
+    dragHandle.addEventListener('mousedown', startDrag);
     document.addEventListener('mousemove', drag);
     document.addEventListener('mouseup', stopDrag);
 
     function startDrag(e) {
+        if (e.target.closest('.controls')) {
+            return;
+        }
         isDragging = true;
         const rect = floatingWindow.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
-        
+
+        floatingWindow.style.right = 'auto';
+        floatingWindow.style.bottom = 'auto';
         floatingWindow.style.cursor = 'grabbing';
         e.preventDefault();
     }
@@ -494,6 +581,12 @@ function setupDrag() {
     }
 
     function stopDrag() {
+        if (isDragging) {
+            localStorage.setItem('floatingWindowPosition', JSON.stringify({
+                left: floatingWindow.offsetLeft,
+                top: floatingWindow.offsetTop
+            }));
+        }
         isDragging = false;
         floatingWindow.style.cursor = '';
     }

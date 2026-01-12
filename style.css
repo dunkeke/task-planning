@@ -12,6 +12,19 @@
     z-index: 9999;
     transition: all 0.3s ease;
     border: 1px solid #e1e5e9;
+    overflow: hidden;
+}
+
+.floating-window::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
 }
 
 .header {
@@ -22,11 +35,27 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 12px 12px 0 0;
+    gap: 10px;
 }
 
 .header h3 {
     margin: 0;
     font-size: 16px;
+    flex: 1;
+}
+
+.header-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .header .controls {

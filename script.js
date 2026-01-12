@@ -459,22 +459,42 @@ class TaskManager {
 
 // 拖拽功能
 function setupDrag() {
-    const dragBar = document.getElementById('drag-bar');
+    const dragHandle = document.querySelector('.drag-handle');
     const floatingWindow = document.getElementById('floating-window');
     
     let isDragging = false;
     let offsetX, offsetY;
 
-    dragBar.addEventListener('mousedown', startDrag);
+    const savedPosition = localStorage.getItem('floatingWindowPosition');
+    if (savedPosition) {
+        try {
+            const position = JSON.parse(savedPosition);
+            if (Number.isFinite(position.left) && Number.isFinite(position.top)) {
+                floatingWindow.style.left = `${position.left}px`;
+                floatingWindow.style.top = `${position.top}px`;
+                floatingWindow.style.right = 'auto';
+                floatingWindow.style.bottom = 'auto';
+            }
+        } catch (error) {
+            localStorage.removeItem('floatingWindowPosition');
+        }
+    }
+
+    dragHandle.addEventListener('mousedown', startDrag);
     document.addEventListener('mousemove', drag);
     document.addEventListener('mouseup', stopDrag);
 
     function startDrag(e) {
+        if (e.target.closest('.controls')) {
+            return;
+        }
         isDragging = true;
         const rect = floatingWindow.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
-        
+
+        floatingWindow.style.right = 'auto';
+        floatingWindow.style.bottom = 'auto';
         floatingWindow.style.cursor = 'grabbing';
         e.preventDefault();
     }
@@ -494,6 +514,12 @@ function setupDrag() {
     }
 
     function stopDrag() {
+        if (isDragging) {
+            localStorage.setItem('floatingWindowPosition', JSON.stringify({
+                left: floatingWindow.offsetLeft,
+                top: floatingWindow.offsetTop
+            }));
+        }
         isDragging = false;
         floatingWindow.style.cursor = '';
     }

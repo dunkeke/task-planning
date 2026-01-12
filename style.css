@@ -12,6 +12,77 @@
     z-index: 9999;
     transition: all 0.3s ease;
     border: 1px solid #e1e5e9;
+    overflow: hidden;
+}
+
+.floating-window::after {
+    content: "";
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    gap: 10px;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 16px;
+    flex: 1;
+}
+
+.header-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.header .controls {
+    display: flex;
+    gap: 8px;
+}
+
+.header .controls button {
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header .controls button:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.drag-handle {
+    cursor: move;
+    user-select: none;
 }
 /* 任务输入区域 */
 .task-input {
@@ -347,19 +418,6 @@
 #task-list::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
-/* 拖拽条 */
-#drag-bar {
-    height: 40px;
-    cursor: move;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    color: white;
-    user-select: none;
-}
-
 /* 任务项样式 */
 .task-item.completed {
     opacity: 0.7;

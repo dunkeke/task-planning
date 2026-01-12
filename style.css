@@ -27,6 +27,14 @@
     pointer-events: none;
 }
 
+.market-window {
+    width: 320px;
+    height: 360px;
+    top: 620px;
+    right: 20px;
+    z-index: 9997;
+}
+
 .header {
     display: flex;
     align-items: center;
@@ -83,6 +91,92 @@
 .drag-handle {
     cursor: move;
     user-select: none;
+}
+
+.market-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.market-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #4a5568;
+}
+
+.market-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.market-item {
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: grid;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.market-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.market-item-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.market-price {
+    font-weight: 600;
+    color: #2b6cb0;
+}
+
+.market-change {
+    font-weight: 600;
+}
+
+.market-change.up {
+    color: #38a169;
+}
+
+.market-change.down {
+    color: #e53e3e;
+}
+
+.market-volatility {
+    color: #718096;
+}
+
+.market-empty {
+    text-align: center;
+    color: #a0aec0;
+    font-size: 12px;
+    padding: 12px 0;
+}
+
+.market-restore-btn {
+    right: 90px;
+    bottom: 20px;
+    background: linear-gradient(135deg, #4299e1 0%, #805ad5 100%);
 }
 /* 任务输入区域 */
 .task-input {

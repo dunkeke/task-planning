@@ -9,6 +9,13 @@ const closeBtn = document.getElementById('close');
 const restoreBtn = document.getElementById('restore-btn');
 const urgentFlagInput = document.getElementById('urgent-flag');
 const urgentTimeInput = document.getElementById('urgent-time');
+const marketWindow = document.getElementById('market-window');
+const marketList = document.getElementById('market-list');
+const marketUpdated = document.getElementById('market-updated');
+const marketRefreshBtn = document.getElementById('market-refresh');
+const marketMinimizeBtn = document.getElementById('market-minimize');
+const marketCloseBtn = document.getElementById('market-close');
+const marketRestoreBtn = document.getElementById('market-restore-btn');
 const workloadDateInput = document.getElementById('workload-date');
 const workloadHoursInput = document.getElementById('workload-hours');
 const workloadNotesInput = document.getElementById('workload-notes');
@@ -524,15 +531,172 @@ class TaskManager {
     }
 }
 
+class MarketTicker {
+    constructor(options) {
+        this.listElement = options.listElement;
+        this.updatedElement = options.updatedElement;
+        this.symbols = [
+            { symbol: 'BZ=F', name: 'Brent 原油' },
+            { symbol: 'HE=F', name: '瘦肉猪' },
+            { symbol: 'HH=F', name: '取暖油' }
+        ];
+        this.refreshIntervalMs = 120000;
+        this.refreshTimer = null;
+    }
+
+    init() {
+        this.renderLoading();
+        this.refresh();
+        this.startAutoRefresh();
+    }
+
+    startAutoRefresh() {
+        if (this.refreshTimer) {
+            clearInterval(this.refreshTimer);
+        }
+        this.refreshTimer = setInterval(() => this.refresh(), this.refreshIntervalMs);
+    }
+
+    async refresh() {
+        const results = await Promise.all(this.symbols.map(symbol => this.fetchSymbol(symbol)));
+        this.renderResults(results);
+        this.updatedElement.textContent = `更新于 ${new Date().toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit'
+        })}`;
+    }
+
+    async fetchSymbol(symbol) {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol.symbol)}?range=1d&interval=5m`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const data = await response.json();
+            const result = data?.chart?.result?.[0];
+            if (!result) {
+                throw new Error('No data');
+            }
+            const price = result.meta?.regularMarketPrice;
+            const previousClose = result.meta?.previousClose ?? result.meta?.chartPreviousClose;
+            const closes = result.indicators?.quote?.[0]?.close ?? [];
+            const volatility = this.calculateVolatility(closes);
+            const change = price != null && previousClose != null ? price - previousClose : null;
+            const changePercent = change != null && previousClose ? (change / previousClose) * 100 : null;
+            return {
+                ...symbol,
+                price,
+                change,
+                changePercent,
+                volatility
+            };
+        } catch (error) {
+            return {
+                ...symbol,
+                error: true
+            };
+        }
+    }
+
+    calculateVolatility(closes) {
+        if (!Array.isArray(closes)) {
+            return null;
+        }
+        const filtered = closes.filter(value => Number.isFinite(value));
+        if (filtered.length < 2) {
+            return null;
+        }
+        const returns = [];
+        for (let i = 1; i < filtered.length; i += 1) {
+            const prev = filtered[i - 1];
+            const current = filtered[i];
+            if (prev <= 0 || current <= 0) {
+                continue;
+            }
+            returns.push(Math.log(current / prev));
+        }
+        if (returns.length === 0) {
+            return null;
+        }
+        const mean = returns.reduce((sum, val) => sum + val, 0) / returns.length;
+        const variance = returns.reduce((sum, val) => sum + (val - mean) ** 2, 0) / returns.length;
+        return Math.sqrt(variance) * Math.sqrt(returns.length) * 100;
+    }
+
+    renderLoading() {
+        this.listElement.innerHTML = '';
+        const loading = document.createElement('li');
+        loading.className = 'market-empty';
+        loading.textContent = '加载行情中...';
+        this.listElement.appendChild(loading);
+    }
+
+    renderResults(results) {
+        this.listElement.innerHTML = '';
+        if (results.length === 0) {
+            const empty = document.createElement('li');
+            empty.className = 'market-empty';
+            empty.textContent = '暂无行情数据';
+            this.listElement.appendChild(empty);
+            return;
+        }
+        results.forEach(result => {
+            const item = document.createElement('li');
+            item.className = 'market-item';
+            if (result.error || result.price == null) {
+                item.innerHTML = `
+                    <div class="market-item-header">
+                        <span>${result.name}</span>
+                        <small>${result.symbol}</small>
+                    </div>
+                    <div class="market-item-body">
+                        <span class="market-volatility">行情获取失败</span>
+                    </div>
+                `;
+            } else {
+                const changeClass = result.change != null && result.change >= 0 ? 'up' : 'down';
+                const changeText = result.change != null
+                    ? `${result.change >= 0 ? '+' : ''}${result.change.toFixed(2)}`
+                    : '--';
+                const changePercentText = result.changePercent != null
+                    ? `${result.changePercent >= 0 ? '+' : ''}${result.changePercent.toFixed(2)}%`
+                    : '--';
+                const volatilityText = result.volatility != null
+                    ? `波动率 ${result.volatility.toFixed(2)}%`
+                    : '波动率 --';
+                item.innerHTML = `
+                    <div class="market-item-header">
+                        <span>${result.name}</span>
+                        <small>${result.symbol}</small>
+                    </div>
+                    <div class="market-item-body">
+                        <span class="market-price">${result.price.toFixed(2)}</span>
+                        <span class="market-change ${changeClass}">${changeText} (${changePercentText})</span>
+                    </div>
+                    <div class="market-volatility">${volatilityText}</div>
+                `;
+            }
+            this.listElement.appendChild(item);
+        });
+    }
+}
+
 // 拖拽功能
-function setupDrag() {
-    const dragHandle = document.querySelector('.drag-handle');
-    const floatingWindow = document.getElementById('floating-window');
+function setupDrag(windowId, storageKey) {
+    const floatingWindow = document.getElementById(windowId);
+    if (!floatingWindow) {
+        return;
+    }
+    const dragHandle = floatingWindow.querySelector('.drag-handle');
+    if (!dragHandle) {
+        return;
+    }
     
     let isDragging = false;
     let offsetX, offsetY;
 
-    const savedPosition = localStorage.getItem('floatingWindowPosition');
+    const savedPosition = localStorage.getItem(storageKey);
     if (savedPosition) {
         try {
             const position = JSON.parse(savedPosition);
@@ -543,7 +707,7 @@ function setupDrag() {
                 floatingWindow.style.bottom = 'auto';
             }
         } catch (error) {
-            localStorage.removeItem('floatingWindowPosition');
+            localStorage.removeItem(storageKey);
         }
     }
 
@@ -582,7 +746,7 @@ function setupDrag() {
 
     function stopDrag() {
         if (isDragging) {
-            localStorage.setItem('floatingWindowPosition', JSON.stringify({
+            localStorage.setItem(storageKey, JSON.stringify({
                 left: floatingWindow.offsetLeft,
                 top: floatingWindow.offsetTop
             }));
@@ -598,7 +762,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.taskManager = new TaskManager();
     
     // 设置拖拽功能
-    setupDrag();
+    setupDrag('floating-window', 'floatingWindowPosition');
+    setupDrag('market-window', 'marketWindowPosition');
+
+    const marketTicker = new MarketTicker({
+        listElement: marketList,
+        updatedElement: marketUpdated
+    });
+    marketTicker.init();
+
+    marketRefreshBtn.addEventListener('click', () => marketTicker.refresh());
+    marketMinimizeBtn.addEventListener('click', () => minimizeMarketWindow());
+    marketCloseBtn.addEventListener('click', () => closeMarketWindow());
+    marketRestoreBtn.addEventListener('click', () => restoreMarketWindow());
     
     // 显示当前日期
     const currentDate = document.getElementById('current-date');
@@ -616,3 +792,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // 自动聚焦到输入框
     newTaskInput.focus();
 });
+
+function minimizeMarketWindow() {
+    if (!marketWindow) {
+        return;
+    }
+    marketWindow.style.display = 'none';
+    marketRestoreBtn.style.display = 'block';
+}
+
+function closeMarketWindow() {
+    if (!marketWindow) {
+        return;
+    }
+    if (confirm('关闭市场播报窗口？')) {
+        marketWindow.style.display = 'none';
+        marketRestoreBtn.style.display = 'block';
+    }
+}
+
+function restoreMarketWindow() {
+    if (!marketWindow) {
+        return;
+    }
+    marketWindow.style.display = 'flex';
+    marketRestoreBtn.style.display = 'none';
+}

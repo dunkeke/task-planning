@@ -63,6 +63,30 @@
     <button id="restore-btn" class="restore-btn">
         <i class="fas fa-tasks"></i>
     </button>
+
+    <!-- 市场信息浮窗 -->
+    <div id="market-window" class="floating-window market-window">
+        <div class="header drag-handle">
+            <h3>市场播报</h3>
+            <div class="controls">
+                <button id="market-refresh" title="刷新"><i class="fas fa-rotate"></i></button>
+                <button id="market-minimize" title="最小化"><i class="fas fa-minus"></i></button>
+                <button id="market-close" title="关闭"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="content market-content">
+            <div class="market-meta">
+                <span>实时行情</span>
+                <small id="market-updated">--</small>
+            </div>
+            <ul id="market-list" class="market-list"></ul>
+        </div>
+    </div>
+
+    <!-- 市场浮窗最小化按钮 -->
+    <button id="market-restore-btn" class="restore-btn market-restore-btn">
+        <i class="fas fa-chart-line"></i>
+    </button>
     
     <script src="script.js"></script>
 </body>
